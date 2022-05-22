@@ -1,17 +1,16 @@
 import logging
 
-from nonebot import get_driver, export
+from nonebot import get_driver
 from nonebot.log import logger, LoguruHandler
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from .config import Config
+from .utils import reschedule_job
 
 driver = get_driver()
-global_config = driver.config
-plugin_config = Config(**global_config.dict())
+plugin_config = Config.parse_obj(driver.config)
 
-scheduler = AsyncIOScheduler()
-export().scheduler = scheduler
+scheduler: AsyncIOScheduler = AsyncIOScheduler()
 
 
 async def _start_scheduler():
@@ -28,3 +27,9 @@ aps_logger = logging.getLogger("apscheduler")
 aps_logger.setLevel(plugin_config.apscheduler_log_level)
 aps_logger.handlers.clear()
 aps_logger.addHandler(LoguruHandler())
+
+
+__all__ = [
+    'scheduler',
+    'reschedule_job'
+]
